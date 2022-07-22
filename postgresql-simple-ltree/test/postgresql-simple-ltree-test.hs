@@ -13,6 +13,7 @@ import Database.PostgreSQL.Simple
   ( Only(..), SqlError(sqlErrorMsg), Connection, close, connectPostgreSQL, execute_, query
   )
 import Database.PostgreSQL.Simple.LTree (mkLabel)
+import System.Environment (lookupEnv)
 import Test.Hspec (describe, expectationFailure, hspec, it)
 import Test.QuickCheck (Gen, arbitrary, property, suchThat)
 import Test.QuickCheck.Monadic (forAllM, monadicIO, run)
@@ -32,17 +33,29 @@ main = withTmpPostgres $ \conn -> hspec $ do
           (const $ verifyTextCanBeALabel conn t)
   where
   withTmpPostgres f = do
-    either throwIO pure =<<
-      TmpPostgres.with
-        (\db ->
-            bracket
-            (connectPostgreSQL $ TmpPostgres.toConnectionString db)
-            close
-            (\conn -> do
-                _ <- execute_ conn "create extension ltree"
-                f conn
+    let go conn = do
+          _ <- execute_ conn "create extension if not exists ltree"
+          f conn
+    -- Checks for the PGDATABASE env var. If it's not set, use
+    -- tmp-postgres. Otherwise, connect to the database
+    -- specified via env vars.
+    lookupEnv "PGDATABASE" >>= \case
+      Nothing ->
+        either throwIO pure =<<
+          TmpPostgres.with
+            (\db ->
+                bracket
+                (connectPostgreSQL $ TmpPostgres.toConnectionString db)
+                close
+                go
             )
-        )
+      Just _ ->
+        -- Uses the env vars as specified here -
+        -- https://www.postgresql.org/docs/13/libpq-envars.html
+        bracket
+          (connectPostgreSQL "")
+          close
+          go
 
   verifyTextCanBeALabel :: Connection -> Text -> IO ()
   verifyTextCanBeALabel conn t = tryConvertTextToLabelInPG conn t >>= \case
