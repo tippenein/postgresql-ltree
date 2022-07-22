@@ -3,6 +3,8 @@ cabal-version: 1.12
 name:           postgresql-ltree
 version:        0.0.0.0
 description:    Please see the README on GitHub at <https://github.com/simspace/postgresql-ltree#readme>
+synopsis:       Types and functions for representing PostgreSQL's ltree
+category:       Database
 homepage:       https://github.com/simspace/postgresql-ltree#readme
 bug-reports:    https://github.com/simspace/postgresql-ltree/issues
 author:         Cary Robbins
@@ -36,7 +38,7 @@ library
   default-language: Haskell2010
   ghc-options:
     -Wall -fwarn-tabs -Wincomplete-uni-patterns
-    -Werror=missing-home-modules -eventlog -O0 +RTS -A32M -RTS
+    -Werror=missing-home-modules -eventlog +RTS -A32M -RTS
 
 test-suite postgresql-ltree-test
   type: exitcode-stdio-1.0
@@ -44,7 +46,7 @@ test-suite postgresql-ltree-test
   hs-source-dirs: test
   ghc-options:
     -Wall -fwarn-tabs -Wincomplete-uni-patterns
-    -Werror=missing-home-modules -eventlog -O0 +RTS -A32M -RTS
+    -Werror=missing-home-modules -eventlog +RTS -A32M -RTS
     -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5

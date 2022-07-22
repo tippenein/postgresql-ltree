@@ -1,4 +1,5 @@
--- | Description: This module provides types and functions for PostgreSQL's @lquery@ https://www.postgresql.org/docs/current/ltree.html
+-- | This module provides types and functions for PostgreSQL's @lquery@ https://www.postgresql.org/docs/current/ltree.html
+--
 -- You will want to use a specific implementation, e.g. @postgresql-simple-ltree@.
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}

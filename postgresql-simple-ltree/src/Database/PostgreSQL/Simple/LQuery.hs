@@ -1,4 +1,4 @@
--- | Description: This module is a wrapper for PostgreSQL's @lquery@ https://www.postgresql.org/docs/current/ltree.html
+-- | This module is a wrapper for PostgreSQL's @lquery@ https://www.postgresql.org/docs/current/ltree.html
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Database.PostgreSQL.Simple.LQuery

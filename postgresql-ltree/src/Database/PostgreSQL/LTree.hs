@@ -1,4 +1,5 @@
--- | Description: This module provides types and functions for PostgreSQL's @ltree@ https://www.postgresql.org/docs/current/ltree.html
+-- | This module provides types and functions for PostgreSQL's @ltree@ https://www.postgresql.org/docs/current/ltree.html
+--
 -- You will want to use a specific implementation, e.g. @postgresql-simple-ltree@.
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -55,15 +56,19 @@ newtype LTree = LTree { unLTree :: Seq Label }
 newtype Label = Label { unLabel :: Text }
   deriving newtype (Show, Eq, Ord)
 
+-- | Produce a new 'LTree' by applying the supplied function to each 'Label'.
 map :: (Label -> Label) -> LTree -> LTree
 map f = LTree . fmap f . unLTree
 
+-- | Convert a list to an 'LTree'.
 fromList :: [Label] -> LTree
 fromList = LTree . Seq.fromList
 
+-- | Convert an 'LTree' to a list.
 toList :: LTree -> [Label]
 toList = Foldable.toList . unLTree
 
+-- | Get the first 'Label' from an 'LTree' if one exists.
 rootLabel :: LTree -> Maybe Label
 rootLabel (LTree (x :<| _)) = Just x
 rootLabel _ = Nothing
@@ -77,6 +82,7 @@ parent :: LTree -> Maybe LTree
 parent (LTree (xs :|> _)) = Just $ LTree xs
 parent _ = Nothing
 
+-- | Get the length of an 'LTree'.
 numLabels :: LTree -> Int
 numLabels (LTree x) = Seq.length x
 
@@ -119,9 +125,11 @@ isValidLabelChar = flip Set.member valid
 empty :: LTree
 empty = LTree mempty
 
+-- | Test whether an 'LTree' is empty.
 null :: LTree -> Bool
 null = Seq.null . unLTree
 
+-- | Construct an 'LTree' from a single 'Label'.
 singleton :: Label -> LTree
 singleton = LTree . Seq.singleton
 
@@ -134,16 +142,25 @@ snoc (LTree xs) x = LTree (xs |> x)
 render :: LTree -> Text
 render = Text.intercalate "." . coerce . toList
 
+-- | Unsafely parse an 'LTree' from 'Text' assuming each 'Label'
+-- is valid. Use this only if you sure the input is a valid 'LTree';
+-- e.g. it was fetched from a field the database of type @ltree@.
 unsafeUncheckedParse :: Text -> LTree
 unsafeUncheckedParse = fromList . coerce . Text.splitOn "."
 
+-- | Parse an 'LTree' from 'Text'. If any 'Label' present is invalid,
+-- returns 'Left'.
 parse :: Text -> Either String LTree
 parse = fmap fromList . traverse mkLabel . Text.splitOn "."
 
+-- | Test whether the first 'LTree' is an immediate parent of the second;
+-- e.g. @a.b@ is an immediate parent of @a.b.c@
 isImmediateParentOf :: LTree -> LTree -> Bool
 isImmediateParentOf (LTree xs) (LTree (ys :|> _)) | xs == ys = True
 isImmediateParentOf _ _ = False
 
+-- | Test whether the first 'LTree' is an immediate child of the second;
+-- e.g. @a.b.c@ is an immediate child of @a.b@
 isImmediateChildOf :: LTree -> LTree -> Bool
 isImmediateChildOf = flip isImmediateParentOf
 
@@ -164,6 +181,7 @@ parseUUIDFromLabel (Label t) =
       pure
       (UUID.fromText $ Text.intercalate "-" [a, b, c, d, e])
 
+-- | Test whether all labels in the 'LTree' are unique.
 allLabelsUnique :: LTree -> Bool
 allLabelsUnique (LTree xs) = length xs == (Set.size . Set.fromList . Foldable.toList $ xs)
 
