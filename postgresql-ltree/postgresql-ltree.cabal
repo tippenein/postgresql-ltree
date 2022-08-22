@@ -30,7 +30,7 @@ library
   hs-source-dirs: src
   build-depends:
       base >=4.7 && <5
-    , aeson >=1.5.6.0 && <2
+    , aeson >=1.5.6.0
     , attoparsec >=0.13.2.5 && <1
     , containers >=0.6.5.1 && <1
     , text >=1.2.4.1 && <2
